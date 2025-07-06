@@ -29,53 +29,117 @@ def make_vapi_call(
     
     url = f"{base_url}/call"
     
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    
-    # Prepare the payload
-    payload = {
-        "assistantId": assistant_id,
-        "phoneNumberId": phone_number_id,
-    }
-    
-    # Add customers (single or multiple)
-    if len(customers) == 1:
-        payload["customer"] = customers[0]
-    else:
-        payload["customers"] = customers
-    
-    # Add schedule plan if provided
-    if schedule_plan:
-        payload["schedulePlan"] = schedule_plan
-    
+    # Ensure all strings are properly encoded
     try:
-        response = requests.post(url, headers=headers, json=payload)
+        # Clean and validate input strings
+        api_key = str(api_key).strip()
+        assistant_id = str(assistant_id).strip()
+        phone_number_id = str(phone_number_id).strip()
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json; charset=utf-8"
+        }
+        
+        # Prepare the payload with proper string handling
+        payload = {
+            "assistantId": assistant_id,
+            "phoneNumberId": phone_number_id,
+        }
+        
+        # Clean customer phone numbers
+        clean_customers = []
+        for customer in customers:
+            clean_customer = {}
+            for key, value in customer.items():
+                if isinstance(value, str):
+                    # Remove any non-printable characters and ensure proper encoding
+                    clean_value = ''.join(char for char in value if char.isprintable()).strip()
+                    clean_customer[key] = clean_value
+                else:
+                    clean_customer[key] = value
+            clean_customers.append(clean_customer)
+        
+        # Add customers (single or multiple)
+        if len(clean_customers) == 1:
+            payload["customer"] = clean_customers[0]
+        else:
+            payload["customers"] = clean_customers
+        
+        # Add schedule plan if provided
+        if schedule_plan:
+            payload["schedulePlan"] = schedule_plan
+        
+        # Convert payload to JSON string first to check for encoding issues
+        json_payload = json.dumps(payload, ensure_ascii=False)
+        
+        response = requests.post(
+            url, 
+            headers=headers, 
+            data=json_payload.encode('utf-8'),
+            timeout=30
+        )
         response.raise_for_status()
         return {"success": True, "data": response.json()}
+        
+    except UnicodeEncodeError as e:
+        return {"success": False, "error": f"Unicode encoding error: {str(e)}", "status_code": None}
+    except json.JSONDecodeError as e:
+        return {"success": False, "error": f"JSON encoding error: {str(e)}", "status_code": None}
+    except requests.exceptions.Timeout:
+        return {"success": False, "error": "Request timeout - the API took too long to respond", "status_code": None}
+    except requests.exceptions.ConnectionError:
+        return {"success": False, "error": "Connection error - unable to reach the API", "status_code": None}
+    except requests.exceptions.HTTPError as e:
+        error_msg = f"HTTP error: {e.response.status_code}"
+        try:
+            error_details = e.response.json()
+            error_msg += f" - {error_details.get('message', 'Unknown error')}"
+        except:
+            error_msg += f" - {e.response.text[:200]}"
+        return {"success": False, "error": error_msg, "status_code": e.response.status_code}
     except requests.exceptions.RequestException as e:
-        return {"success": False, "error": str(e), "status_code": getattr(e.response, 'status_code', None)}
+        return {"success": False, "error": f"Request error: {str(e)}", "status_code": getattr(e.response, 'status_code', None)}
+    except Exception as e:
+        return {"success": False, "error": f"Unexpected error: {str(e)}", "status_code": None}
 
 def validate_phone_number(phone: str) -> bool:
     """Basic phone number validation."""
-    # Remove spaces and common formatting
-    clean_phone = phone.replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
-    
-    # Check if it starts with + and has appropriate length
-    if clean_phone.startswith("+") and len(clean_phone) >= 10:
-        return True
-    return False
+    try:
+        # Convert to string and remove any non-printable characters
+        phone_str = str(phone).strip()
+        phone_str = ''.join(char for char in phone_str if char.isprintable())
+        
+        # Remove spaces and common formatting
+        clean_phone = phone_str.replace(" ", "").replace("-", "").replace("(", "").replace(")", "").replace(".", "")
+        
+        # Check if it starts with + and has appropriate length
+        if clean_phone.startswith("+") and len(clean_phone) >= 10 and len(clean_phone) <= 18:
+            # Check if the rest are digits
+            if clean_phone[1:].isdigit():
+                return True
+        return False
+    except Exception:
+        return False
 
 def parse_bulk_numbers(text: str) -> List[str]:
     """Parse bulk phone numbers from text input."""
-    lines = text.strip().split('\n')
-    numbers = []
-    for line in lines:
-        line = line.strip()
-        if line and validate_phone_number(line):
-            numbers.append(line)
-    return numbers
+    try:
+        # Clean the text of any non-printable characters
+        clean_text = ''.join(char for char in text if char.isprintable() or char in ['\n', '\r', '\t'])
+        lines = clean_text.strip().split('\n')
+        numbers = []
+        
+        for line in lines:
+            line = line.strip()
+            if line:
+                # Clean each phone number
+                clean_line = ''.join(char for char in line if char.isprintable()).strip()
+                if clean_line and validate_phone_number(clean_line):
+                    numbers.append(clean_line)
+        return numbers
+    except Exception:
+        return []
 
 # Main app
 def main():
@@ -231,9 +295,21 @@ def main():
                         if phone_column:
                             customer_numbers = []
                             for phone in df[phone_column].dropna():
-                                phone_str = str(phone).strip()
-                                if validate_phone_number(phone_str):
-                                    customer_numbers.append(phone_str)
+                                try:
+                                    # Convert to string and clean
+                                    phone_str = str(phone).strip()
+                                    phone_str = ''.join(char for char in phone_str if char.isprintable()).strip()
+                                    
+                                    # Handle potential float values from CSV
+                                    if phone_str.replace('.', '').replace('-', '').replace('+', '').isdigit():
+                                        # If it's a number without +, add it
+                                        if not phone_str.startswith('+'):
+                                            phone_str = '+' + phone_str.replace('.', '').replace('-', '')
+                                    
+                                    if validate_phone_number(phone_str):
+                                        customer_numbers.append(phone_str)
+                                except Exception:
+                                    continue  # Skip invalid entries
                             
                             st.info(f"Found {len(customer_numbers)} valid phone numbers from column '{phone_column}'")
                         else:
