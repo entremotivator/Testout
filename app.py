@@ -12,7 +12,6 @@ import sqlite3
 import uuid
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 # Configure the page
 st.set_page_config(
@@ -156,142 +155,264 @@ ASSISTANTS = {
     "Businesses Launcher": "dffb2e5c-7d59-462b-a8aa-48746ea70cb1"
 }
 
-# Voice options for assistants
-VOICE_OPTIONS = {
-    "alloy": "Alloy - Balanced and clear",
-    "echo": "Echo - Warm and engaging",
-    "fable": "Fable - Expressive and dynamic",
-    "onyx": "Onyx - Deep and authoritative",
-    "nova": "Nova - Bright and energetic",
-    "shimmer": "Shimmer - Gentle and soothing"
-}
-
-# Model options
-MODEL_OPTIONS = {
-    "gpt-4": "GPT-4 - Most capable",
-    "gpt-3.5-turbo": "GPT-3.5 Turbo - Fast and efficient",
-    "gpt-4-turbo": "GPT-4 Turbo - Latest and fastest"
-}
-
 # Order status options
 ORDER_STATUSES = [
-    "Pending",
-    "Processing", 
-    "Shipped",
-    "Delivered",
-    "Completed",
-    "Cancelled",
-    "Refunded",
-    "On Hold"
+    "Pending", "Processing", "Shipped", "Delivered", "Completed", "Cancelled", "Refunded", "On Hold"
 ]
 
 # Customer status options
 CUSTOMER_STATUSES = [
-    "Hot Lead",
-    "Warm Lead", 
-    "Cold Lead",
-    "Customer",
-    "Inactive",
-    "Churned"
+    "Hot Lead", "Warm Lead", "Cold Lead", "Customer", "Inactive", "Churned"
 ]
 
-# Demo customers data
+# Demo customers data (25 customers)
 DEMO_CUSTOMERS = [
     {
-        "id": "cust_001",
-        "name": "John Smith",
-        "email": "john.smith@email.com",
-        "phone": "+1234567890",
-        "company": "Tech Solutions Inc",
-        "position": "CEO",
-        "lead_score": 85,
-        "status": "Hot Lead",
-        "last_contact": "2024-01-15",
-        "notes": "Interested in enterprise solution",
+        "id": "cust_001", "name": "John Smith", "email": "john.smith@email.com", "phone": "+1234567890",
+        "company": "Tech Solutions Inc", "position": "CEO", "lead_score": 85, "status": "Hot Lead",
+        "last_contact": "2024-01-15", "notes": "Interested in enterprise solution",
         "orders": [
             {"id": "ORD-001", "date": "2024-01-10", "amount": 5000, "status": "Completed", "product": "Enterprise Package"},
             {"id": "ORD-002", "date": "2024-01-20", "amount": 2500, "status": "Processing", "product": "Add-on Services"}
         ],
-        "total_value": 7500,
-        "tags": ["Enterprise", "High Value", "Decision Maker"]
+        "total_value": 7500, "tags": ["Enterprise", "High Value", "Decision Maker"]
     },
     {
-        "id": "cust_002",
-        "name": "Sarah Johnson",
-        "email": "sarah.j@businesscorp.com",
-        "phone": "+1234567891",
-        "company": "Business Corp",
-        "position": "Marketing Director",
-        "lead_score": 72,
-        "status": "Warm Lead",
-        "last_contact": "2024-01-12",
-        "notes": "Needs marketing automation tools",
+        "id": "cust_002", "name": "Sarah Johnson", "email": "sarah.j@businesscorp.com", "phone": "+1234567891",
+        "company": "Business Corp", "position": "Marketing Director", "lead_score": 72, "status": "Warm Lead",
+        "last_contact": "2024-01-12", "notes": "Needs marketing automation tools",
         "orders": [
             {"id": "ORD-003", "date": "2024-01-05", "amount": 1200, "status": "Completed", "product": "Marketing Suite"}
         ],
-        "total_value": 1200,
-        "tags": ["Marketing", "Mid-Market", "Repeat Customer"]
+        "total_value": 1200, "tags": ["Marketing", "Mid-Market", "Repeat Customer"]
     },
     {
-        "id": "cust_003",
-        "name": "Michael Brown",
-        "email": "m.brown@startup.io",
-        "phone": "+1234567892",
-        "company": "Startup Innovations",
-        "position": "Founder",
-        "lead_score": 90,
-        "status": "Hot Lead",
-        "last_contact": "2024-01-18",
-        "notes": "Fast-growing startup, budget approved",
-        "orders": [],
-        "total_value": 0,
-        "tags": ["Startup", "High Potential", "New Customer"]
+        "id": "cust_003", "name": "Michael Brown", "email": "m.brown@startup.io", "phone": "+1234567892",
+        "company": "Startup Innovations", "position": "Founder", "lead_score": 90, "status": "Hot Lead",
+        "last_contact": "2024-01-18", "notes": "Fast-growing startup, budget approved",
+        "orders": [], "total_value": 0, "tags": ["Startup", "High Potential", "New Customer"]
     },
     {
-        "id": "cust_004",
-        "name": "Emily Davis",
-        "email": "emily.davis@retailplus.com",
-        "phone": "+1234567893",
-        "company": "Retail Plus",
-        "position": "Operations Manager",
-        "lead_score": 65,
-        "status": "Cold Lead",
-        "last_contact": "2024-01-08",
-        "notes": "Interested but budget constraints",
+        "id": "cust_004", "name": "Emily Davis", "email": "emily.davis@retailplus.com", "phone": "+1234567893",
+        "company": "Retail Plus", "position": "Operations Manager", "lead_score": 65, "status": "Cold Lead",
+        "last_contact": "2024-01-08", "notes": "Interested but budget constraints",
         "orders": [
             {"id": "ORD-004", "date": "2023-12-15", "amount": 800, "status": "Completed", "product": "Basic Package"}
         ],
-        "total_value": 800,
-        "tags": ["Retail", "Budget Conscious", "Small Business"]
+        "total_value": 800, "tags": ["Retail", "Budget Conscious", "Small Business"]
     },
     {
-        "id": "cust_005",
-        "name": "David Wilson",
-        "email": "d.wilson@manufacturing.com",
-        "phone": "+1234567894",
-        "company": "Wilson Manufacturing",
-        "position": "Plant Manager",
-        "lead_score": 78,
-        "status": "Warm Lead",
-        "last_contact": "2024-01-14",
-        "notes": "Looking for automation solutions",
+        "id": "cust_005", "name": "David Wilson", "email": "d.wilson@manufacturing.com", "phone": "+1234567894",
+        "company": "Wilson Manufacturing", "position": "Plant Manager", "lead_score": 78, "status": "Warm Lead",
+        "last_contact": "2024-01-14", "notes": "Looking for automation solutions",
         "orders": [
             {"id": "ORD-005", "date": "2024-01-12", "amount": 3500, "status": "Shipped", "product": "Automation Tools"}
         ],
-        "total_value": 3500,
-        "tags": ["Manufacturing", "Automation", "Industrial"]
+        "total_value": 3500, "tags": ["Manufacturing", "Automation", "Industrial"]
+    },
+    {
+        "id": "cust_006", "name": "Lisa Anderson", "email": "lisa.a@healthcareplus.org", "phone": "+1234567895",
+        "company": "Healthcare Plus", "position": "IT Director", "lead_score": 82, "status": "Hot Lead",
+        "last_contact": "2024-01-16", "notes": "HIPAA compliance requirements",
+        "orders": [
+            {"id": "ORD-006", "date": "2024-01-08", "amount": 4200, "status": "Processing", "product": "Healthcare Suite"}
+        ],
+        "total_value": 4200, "tags": ["Healthcare", "Compliance", "Security"]
+    },
+    {
+        "id": "cust_007", "name": "Robert Taylor", "email": "r.taylor@financefirm.com", "phone": "+1234567896",
+        "company": "Taylor Finance", "position": "CFO", "lead_score": 88, "status": "Hot Lead",
+        "last_contact": "2024-01-17", "notes": "Needs financial reporting tools",
+        "orders": [
+            {"id": "ORD-007", "date": "2024-01-15", "amount": 6000, "status": "Completed", "product": "Financial Suite"},
+            {"id": "ORD-008", "date": "2024-01-18", "amount": 1500, "status": "Pending", "product": "Reporting Add-on"}
+        ],
+        "total_value": 7500, "tags": ["Finance", "High Value", "Enterprise"]
+    },
+    {
+        "id": "cust_008", "name": "Jennifer Martinez", "email": "j.martinez@educationtech.edu", "phone": "+1234567897",
+        "company": "Education Tech Institute", "position": "Technology Coordinator", "lead_score": 70, "status": "Warm Lead",
+        "last_contact": "2024-01-11", "notes": "Educational discount applicable",
+        "orders": [
+            {"id": "ORD-009", "date": "2024-01-10", "amount": 2000, "status": "Completed", "product": "Education Package"}
+        ],
+        "total_value": 2000, "tags": ["Education", "Non-Profit", "Discount"]
+    },
+    {
+        "id": "cust_009", "name": "Christopher Lee", "email": "c.lee@realestate.com", "phone": "+1234567898",
+        "company": "Prime Real Estate", "position": "Broker", "lead_score": 75, "status": "Warm Lead",
+        "last_contact": "2024-01-13", "notes": "Seasonal business, peak in spring",
+        "orders": [
+            {"id": "ORD-010", "date": "2024-01-05", "amount": 1800, "status": "Completed", "product": "CRM Package"}
+        ],
+        "total_value": 1800, "tags": ["Real Estate", "Seasonal", "CRM"]
+    },
+    {
+        "id": "cust_010", "name": "Amanda White", "email": "a.white@consulting.biz", "phone": "+1234567899",
+        "company": "White Consulting", "position": "Principal Consultant", "lead_score": 80, "status": "Hot Lead",
+        "last_contact": "2024-01-19", "notes": "Multi-client deployment needed",
+        "orders": [
+            {"id": "ORD-011", "date": "2024-01-16", "amount": 3200, "status": "Processing", "product": "Consulting Suite"}
+        ],
+        "total_value": 3200, "tags": ["Consulting", "Multi-Client", "Professional Services"]
+    },
+    {
+        "id": "cust_011", "name": "James Garcia", "email": "j.garcia@logistics.net", "phone": "+1234567800",
+        "company": "Garcia Logistics", "position": "Operations Director", "lead_score": 73, "status": "Warm Lead",
+        "last_contact": "2024-01-10", "notes": "Supply chain optimization focus",
+        "orders": [
+            {"id": "ORD-012", "date": "2024-01-08", "amount": 2800, "status": "Shipped", "product": "Logistics Suite"}
+        ],
+        "total_value": 2800, "tags": ["Logistics", "Supply Chain", "Operations"]
+    },
+    {
+        "id": "cust_012", "name": "Michelle Thompson", "email": "m.thompson@restaurant.com", "phone": "+1234567801",
+        "company": "Thompson's Restaurant Group", "position": "General Manager", "lead_score": 68, "status": "Cold Lead",
+        "last_contact": "2024-01-07", "notes": "Multiple locations, needs unified system",
+        "orders": [
+            {"id": "ORD-013", "date": "2023-12-20", "amount": 1500, "status": "Completed", "product": "Restaurant POS"}
+        ],
+        "total_value": 1500, "tags": ["Restaurant", "Multi-Location", "POS"]
+    },
+    {
+        "id": "cust_013", "name": "Kevin Rodriguez", "email": "k.rodriguez@autoparts.com", "phone": "+1234567802",
+        "company": "Rodriguez Auto Parts", "position": "Owner", "lead_score": 76, "status": "Warm Lead",
+        "last_contact": "2024-01-15", "notes": "Inventory management priority",
+        "orders": [
+            {"id": "ORD-014", "date": "2024-01-12", "amount": 2200, "status": "Processing", "product": "Inventory System"}
+        ],
+        "total_value": 2200, "tags": ["Automotive", "Inventory", "Small Business"]
+    },
+    {
+        "id": "cust_014", "name": "Nicole Clark", "email": "n.clark@lawfirm.legal", "phone": "+1234567803",
+        "company": "Clark & Associates Law", "position": "Managing Partner", "lead_score": 85, "status": "Hot Lead",
+        "last_contact": "2024-01-18", "notes": "Document management and billing focus",
+        "orders": [
+            {"id": "ORD-015", "date": "2024-01-14", "amount": 4500, "status": "Completed", "product": "Legal Suite"}
+        ],
+        "total_value": 4500, "tags": ["Legal", "Document Management", "Professional"]
+    },
+    {
+        "id": "cust_015", "name": "Daniel Lewis", "email": "d.lewis@construction.build", "phone": "+1234567804",
+        "company": "Lewis Construction", "position": "Project Manager", "lead_score": 71, "status": "Warm Lead",
+        "last_contact": "2024-01-12", "notes": "Project tracking and scheduling needs",
+        "orders": [
+            {"id": "ORD-016", "date": "2024-01-09", "amount": 3100, "status": "Shipped", "product": "Project Management Suite"}
+        ],
+        "total_value": 3100, "tags": ["Construction", "Project Management", "Scheduling"]
+    },
+    {
+        "id": "cust_016", "name": "Rachel Walker", "email": "r.walker@fitness.gym", "phone": "+1234567805",
+        "company": "Walker Fitness Centers", "position": "Franchise Owner", "lead_score": 69, "status": "Cold Lead",
+        "last_contact": "2024-01-09", "notes": "Member management and billing",
+        "orders": [
+            {"id": "ORD-017", "date": "2024-01-06", "amount": 1900, "status": "Completed", "product": "Fitness Management"}
+        ],
+        "total_value": 1900, "tags": ["Fitness", "Membership", "Franchise"]
+    },
+    {
+        "id": "cust_017", "name": "Steven Hall", "email": "s.hall@insurance.protect", "phone": "+1234567806",
+        "company": "Hall Insurance Agency", "position": "Agency Owner", "lead_score": 77, "status": "Warm Lead",
+        "last_contact": "2024-01-16", "notes": "Client management and policy tracking",
+        "orders": [
+            {"id": "ORD-018", "date": "2024-01-13", "amount": 2600, "status": "Processing", "product": "Insurance CRM"}
+        ],
+        "total_value": 2600, "tags": ["Insurance", "Client Management", "Policy Tracking"]
+    },
+    {
+        "id": "cust_018", "name": "Karen Young", "email": "k.young@veterinary.care", "phone": "+1234567807",
+        "company": "Young Veterinary Clinic", "position": "Practice Manager", "lead_score": 74, "status": "Warm Lead",
+        "last_contact": "2024-01-14", "notes": "Patient records and appointment scheduling",
+        "orders": [
+            {"id": "ORD-019", "date": "2024-01-11", "amount": 2300, "status": "Completed", "product": "Veterinary Suite"}
+        ],
+        "total_value": 2300, "tags": ["Veterinary", "Healthcare", "Appointments"]
+    },
+    {
+        "id": "cust_019", "name": "Brian King", "email": "b.king@photography.studio", "phone": "+1234567808",
+        "company": "King Photography Studio", "position": "Owner/Photographer", "lead_score": 66, "status": "Cold Lead",
+        "last_contact": "2024-01-08", "notes": "Client galleries and booking system",
+        "orders": [
+            {"id": "ORD-020", "date": "2023-12-28", "amount": 1100, "status": "Completed", "product": "Photography Suite"}
+        ],
+        "total_value": 1100, "tags": ["Photography", "Creative", "Booking"]
+    },
+    {
+        "id": "cust_020", "name": "Angela Wright", "email": "a.wright@accounting.numbers", "phone": "+1234567809",
+        "company": "Wright Accounting Services", "position": "CPA", "lead_score": 81, "status": "Hot Lead",
+        "last_contact": "2024-01-17", "notes": "Tax season preparation, client portal needed",
+        "orders": [
+            {"id": "ORD-021", "date": "2024-01-15", "amount": 3800, "status": "Processing", "product": "Accounting Suite"}
+        ],
+        "total_value": 3800, "tags": ["Accounting", "Tax", "Client Portal"]
+    },
+    {
+        "id": "cust_021", "name": "Gregory Green", "email": "g.green@landscaping.earth", "phone": "+1234567810",
+        "company": "Green Landscaping Co", "position": "Business Owner", "lead_score": 70, "status": "Warm Lead",
+        "last_contact": "2024-01-13", "notes": "Seasonal business, route optimization",
+        "orders": [
+            {"id": "ORD-022", "date": "2024-01-10", "amount": 1700, "status": "Shipped", "product": "Field Service Suite"}
+        ],
+        "total_value": 1700, "tags": ["Landscaping", "Seasonal", "Field Service"]
+    },
+    {
+        "id": "cust_022", "name": "Stephanie Adams", "email": "s.adams@dental.smile", "phone": "+1234567811",
+        "company": "Adams Dental Practice", "position": "Office Manager", "lead_score": 79, "status": "Warm Lead",
+        "last_contact": "2024-01-16", "notes": "Patient scheduling and insurance billing",
+        "orders": [
+            {"id": "ORD-023", "date": "2024-01-12", "amount": 2900, "status": "Processing", "product": "Dental Practice Suite"}
+        ],
+        "total_value": 2900, "tags": ["Dental", "Healthcare", "Insurance"]
+    },
+    {
+        "id": "cust_023", "name": "Timothy Baker", "email": "t.baker@bakery.fresh", "phone": "+1234567812",
+        "company": "Baker's Fresh Bakery", "position": "Owner", "lead_score": 63, "status": "Cold Lead",
+        "last_contact": "2024-01-09", "notes": "Inventory and ordering system needed",
+        "orders": [
+            {"id": "ORD-024", "date": "2024-01-07", "amount": 1300, "status": "Completed", "product": "Retail POS"}
+        ],
+        "total_value": 1300, "tags": ["Food Service", "Retail", "Inventory"]
+    },
+    {
+        "id": "cust_024", "name": "Melissa Nelson", "email": "m.nelson@spa.relax", "phone": "+1234567813",
+        "company": "Nelson Day Spa", "position": "Spa Director", "lead_score": 72, "status": "Warm Lead",
+        "last_contact": "2024-01-15", "notes": "Appointment booking and customer management",
+        "orders": [
+            {"id": "ORD-025", "date": "2024-01-13", "amount": 2100, "status": "Processing", "product": "Spa Management Suite"}
+        ],
+        "total_value": 2100, "tags": ["Spa", "Wellness", "Appointments"]
+    },
+    {
+        "id": "cust_025", "name": "Anthony Carter", "email": "a.carter@security.safe", "phone": "+1234567814",
+        "company": "Carter Security Solutions", "position": "Security Director", "lead_score": 84, "status": "Hot Lead",
+        "last_contact": "2024-01-18", "notes": "Enterprise security monitoring system",
+        "orders": [
+            {"id": "ORD-026", "date": "2024-01-16", "amount": 5500, "status": "Processing", "product": "Security Suite"}
+        ],
+        "total_value": 5500, "tags": ["Security", "Enterprise", "Monitoring"]
     }
 ]
 
 # Initialize session state
-if 'call_results' not in st.session_state:
-    st.session_state.call_results = []
-if 'call_monitoring' not in st.session_state:
-    st.session_state.call_monitoring = {}
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = "Dashboard"
-if 'api_key' not in st.session_state:
-    st.session_state.api_key = ""
+def init_session_state():
+    """Initialize all session state variables with unique identifiers."""
+    session_vars = {
+        'current_page': "📊 Dashboard",
+        'api_key': "",
+        'selected_customer_for_call': None,
+        'show_add_customer': False,
+        'editing_customer': None,
+        'viewing_customer_orders': None,
+        'viewing_customer_interactions': None,
+        'viewing_transcript': None,
+        'viewing_recording': None,
+        'call_monitoring': {},
+        'call_results': []
+    }
+    
+    for var, default_value in session_vars.items():
+        if var not in st.session_state:
+            st.session_state[var] = default_value
 
 # Utility functions
 def save_call_to_db(call_data):
@@ -341,7 +462,6 @@ def get_calls_from_db(limit=None):
     calls = cursor.fetchall()
     conn.close()
     
-    # Convert to list of dictionaries
     columns = ['id', 'timestamp', 'type', 'assistant_name', 'assistant_id', 
                'customer_phone', 'customer_name', 'customer_email', 'call_id', 
                'status', 'notes', 'transcript', 'recording_url', 'recording_path', 
@@ -349,44 +469,57 @@ def get_calls_from_db(limit=None):
     
     return [dict(zip(columns, call)) for call in calls]
 
-def get_call_analytics():
-    """Get call analytics data."""
+def get_customers_from_db(search_term=None, status_filter=None, limit=None):
+    """Retrieve customers from database with optional filtering."""
     conn = sqlite3.connect('vapi_calls.db')
     cursor = conn.cursor()
     
-    # Get daily stats
-    cursor.execute('''
-        SELECT 
-            DATE(created_at) as date,
-            COUNT(*) as total_calls,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as successful_calls,
-            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_calls,
-            AVG(duration) as avg_duration,
-            SUM(cost) as total_cost
-        FROM calls 
-        WHERE created_at >= date('now', '-30 days')
-        GROUP BY DATE(created_at)
-        ORDER BY date DESC
-    ''')
+    query = 'SELECT * FROM customers'
+    params = []
+    conditions = []
     
-    daily_stats = cursor.fetchall()
+    if search_term:
+        conditions.append('(name LIKE ? OR email LIKE ? OR company LIKE ? OR phone LIKE ?)')
+        search_pattern = f'%{search_term}%'
+        params.extend([search_pattern, search_pattern, search_pattern, search_pattern])
     
-    # Get overall stats
-    cursor.execute('''
-        SELECT 
-            COUNT(*) as total_calls,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as successful_calls,
-            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_calls,
-            AVG(duration) as avg_duration,
-            SUM(cost) as total_cost,
-            COUNT(DISTINCT assistant_name) as unique_assistants
-        FROM calls
-    ''')
+    if status_filter and status_filter != "All":
+        conditions.append('status = ?')
+        params.append(status_filter)
     
-    overall_stats = cursor.fetchone()
+    if conditions:
+        query += ' WHERE ' + ' AND '.join(conditions)
+    
+    query += ' ORDER BY updated_at DESC'
+    
+    if limit:
+        query += f' LIMIT {limit}'
+    
+    cursor.execute(query, params)
+    customers = cursor.fetchall()
     conn.close()
     
-    return daily_stats, overall_stats
+    columns = ['id', 'name', 'email', 'phone', 'company', 'position', 'lead_score', 
+               'status', 'last_contact', 'notes', 'total_value', 'tags', 'created_at', 
+               'updated_at', 'address', 'city', 'state', 'zip_code', 'country', 
+               'website', 'industry', 'company_size', 'annual_revenue', 'source', 'assigned_to']
+    
+    return [dict(zip(columns, customer)) for customer in customers]
+
+def get_customer_orders(customer_id):
+    """Get orders for a specific customer."""
+    conn = sqlite3.connect('vapi_calls.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT * FROM orders WHERE customer_id = ? ORDER BY order_date DESC', (customer_id,))
+    orders = cursor.fetchall()
+    conn.close()
+    
+    columns = ['id', 'customer_id', 'order_date', 'amount', 'status', 'product', 
+               'quantity', 'discount', 'tax', 'shipping', 'total', 'notes', 
+               'created_at', 'updated_at']
+    
+    return [dict(zip(columns, order)) for order in orders]
 
 def load_demo_customers():
     """Load demo customers into the database."""
@@ -436,73 +569,6 @@ def load_demo_customers():
     
     conn.commit()
     conn.close()
-
-def get_customers_from_db(search_term=None, status_filter=None, limit=None):
-    """Retrieve customers from database with optional filtering."""
-    conn = sqlite3.connect('vapi_calls.db')
-    cursor = conn.cursor()
-    
-    query = 'SELECT * FROM customers'
-    params = []
-    conditions = []
-    
-    if search_term:
-        conditions.append('(name LIKE ? OR email LIKE ? OR company LIKE ? OR phone LIKE ?)')
-        search_pattern = f'%{search_term}%'
-        params.extend([search_pattern, search_pattern, search_pattern, search_pattern])
-    
-    if status_filter:
-        conditions.append('status = ?')
-        params.append(status_filter)
-    
-    if conditions:
-        query += ' WHERE ' + ' AND '.join(conditions)
-    
-    query += ' ORDER BY updated_at DESC'
-    
-    if limit:
-        query += f' LIMIT {limit}'
-    
-    cursor.execute(query, params)
-    customers = cursor.fetchall()
-    conn.close()
-    
-    # Convert to list of dictionaries
-    columns = ['id', 'name', 'email', 'phone', 'company', 'position', 'lead_score', 
-               'status', 'last_contact', 'notes', 'total_value', 'tags', 'created_at', 
-               'updated_at', 'address', 'city', 'state', 'zip_code', 'country', 
-               'website', 'industry', 'company_size', 'annual_revenue', 'source', 'assigned_to']
-    
-    return [dict(zip(columns, customer)) for customer in customers]
-
-def test_api_connection(api_key: str) -> Dict:
-    """Test the API connection by making a simple request."""
-    try:
-        url = "https://api.vapi.ai/assistant"
-        headers = {
-            "Authorization": f"Bearer {api_key.strip()}",
-            "Content-Type": "application/json; charset=utf-8"
-        }
-        
-        response = requests.get(url, headers=headers, timeout=10)
-        
-        if response.status_code == 200:
-            return {"success": True, "data": response.json()}
-        else:
-            error_msg = f"HTTP {response.status_code}"
-            try:
-                error_details = response.json()
-                error_msg += f" - {error_details.get('message', 'Unknown error')}"
-            except:
-                error_msg += f" - {response.text[:200]}"
-            return {"success": False, "error": error_msg, "status_code": response.status_code}
-        
-    except requests.exceptions.Timeout:
-        return {"success": False, "error": "Request timeout", "status_code": None}
-    except requests.exceptions.ConnectionError:
-        return {"success": False, "error": "Connection error", "status_code": None}
-    except Exception as e:
-        return {"success": False, "error": str(e), "status_code": None}
 
 def validate_phone_number(phone: str) -> bool:
     """Basic phone number validation."""
@@ -580,9 +646,38 @@ def make_vapi_call(
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+def test_api_connection(api_key: str) -> Dict:
+    """Test the API connection by making a simple request."""
+    try:
+        url = "https://api.vapi.ai/assistant"
+        headers = {
+            "Authorization": f"Bearer {api_key.strip()}",
+            "Content-Type": "application/json; charset=utf-8"
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            return {"success": True, "data": response.json()}
+        else:
+            error_msg = f"HTTP {response.status_code}"
+            try:
+                error_details = response.json()
+                error_msg += f" - {error_details.get('message', 'Unknown error')}"
+            except:
+                error_msg += f" - {response.text[:200]}"
+            return {"success": False, "error": error_msg, "status_code": response.status_code}
+        
+    except requests.exceptions.Timeout:
+        return {"success": False, "error": "Request timeout", "status_code": None}
+    except requests.exceptions.ConnectionError:
+        return {"success": False, "error": "Connection error", "status_code": None}
+    except Exception as e:
+        return {"success": False, "error": str(e), "status_code": None}
+
 # Navigation
 def render_navigation():
-    """Render the navigation sidebar."""
+    """Render the navigation sidebar with unique keys."""
     with st.sidebar:
         st.title("📞 Vapi Pro Enhanced")
         
@@ -592,7 +687,7 @@ def render_navigation():
             type="password",
             value=st.session_state.api_key,
             help="Your Vapi API key",
-            key="sidebar_api_key"
+            key="nav_sidebar_api_key_input_unique_001"
         )
         
         if api_key != st.session_state.api_key:
@@ -600,7 +695,7 @@ def render_navigation():
         
         # API Connection Status
         if api_key:
-            if st.button("🔍 Test Connection", key="sidebar_test_connection"):
+            if st.button("🔍 Test Connection", key="nav_sidebar_test_connection_btn_unique_002"):
                 with st.spinner("Testing..."):
                     result = test_api_connection(api_key)
                     if result["success"]:
@@ -624,7 +719,7 @@ def render_navigation():
             "⚙️ Settings"
         ]
         
-        selected_page = st.radio("Navigation", pages, key="sidebar_nav_radio")
+        selected_page = st.radio("Navigation", pages, key="nav_sidebar_page_radio_unique_003")
         
         # Update current page
         if selected_page != st.session_state.current_page:
@@ -632,7 +727,7 @@ def render_navigation():
         
         st.divider()
         
-        # Quick stats including CRM
+        # Quick stats
         if api_key:
             calls = get_calls_from_db(limit=10)
             customers = get_customers_from_db(limit=10)
@@ -645,36 +740,30 @@ def render_navigation():
                 st.metric("Success Rate", f"{(completed_calls/len(calls)*100):.1f}%")
 
 def render_dashboard():
-    """Render the dashboard page."""
+    """Render the dashboard page with unique keys."""
     st.title("📊 Dashboard")
     st.markdown("Welcome to your Vapi Outbound Calling dashboard")
     
     # Get analytics data
-    daily_stats, overall_stats = get_call_analytics()
+    calls = get_calls_from_db()
+    customers = get_customers_from_db()
     
     # Overview metrics
     col1, col2, col3, col4 = st.columns(4)
     
-    if overall_stats:
-        with col1:
-            st.metric("Total Calls", overall_stats[0] or 0)
-        with col2:
-            st.metric("Successful Calls", overall_stats[1] or 0)
-        with col3:
-            success_rate = (overall_stats[1] / overall_stats[0] * 100) if overall_stats[0] > 0 else 0
-            st.metric("Success Rate", f"{success_rate:.1f}%")
-        with col4:
-            st.metric("Total Cost", f"${overall_stats[4] or 0:.2f}")
+    with col1:
+        st.metric("Total Calls", len(calls))
     
-    # Recent activity
-    st.subheader("📈 Recent Activity")
+    with col2:
+        completed_calls = len([c for c in calls if c['status'] == 'completed'])
+        st.metric("Successful Calls", completed_calls)
     
-    if daily_stats:
-        # Create daily activity chart
-        df_daily = pd.DataFrame(daily_stats, columns=['date', 'total_calls', 'successful_calls', 'failed_calls', 'avg_duration', 'total_cost'])
-        
-        fig = px.line(df_daily, x='date', y='total_calls', title='Daily Call Volume')
-        st.plotly_chart(fig, use_container_width=True)
+    with col3:
+        success_rate = (completed_calls / len(calls) * 100) if calls else 0
+        st.metric("Success Rate", f"{success_rate:.1f}%")
+    
+    with col4:
+        st.metric("Total Customers", len(customers))
     
     # Recent calls
     st.subheader("📞 Recent Calls")
@@ -682,7 +771,7 @@ def render_dashboard():
     
     if recent_calls:
         for i, call in enumerate(recent_calls):
-            with st.expander(f"📞 {call['customer_phone']} - {call['status'].upper()}", key=f"dashboard_call_{i}"):
+            with st.expander(f"📞 {call['customer_phone']} - {call['status'].upper()}", key=f"dashboard_call_expander_unique_{i}_004"):
                 col1, col2 = st.columns(2)
                 with col1:
                     st.write(f"**Assistant:** {call['assistant_name']}")
@@ -702,22 +791,22 @@ def render_dashboard():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📞 Make Single Call", type="primary", key="dashboard_make_call"):
+        if st.button("📞 Make Single Call", type="primary", key="dashboard_make_call_btn_unique_005"):
             st.session_state.current_page = "📞 Make Calls"
             st.rerun()
     
     with col2:
-        if st.button("📋 View Call History", key="dashboard_call_history"):
+        if st.button("📋 View Call History", key="dashboard_call_history_btn_unique_006"):
             st.session_state.current_page = "📋 Call History"
             st.rerun()
     
     with col3:
-        if st.button("🤖 Manage Assistants", key="dashboard_assistants"):
-            st.session_state.current_page = "🤖 Assistant Manager"
+        if st.button("👥 Manage CRM", key="dashboard_crm_btn_unique_007"):
+            st.session_state.current_page = "👥 CRM Dashboard"
             st.rerun()
 
 def render_make_calls():
-    """Render the make calls page."""
+    """Render the make calls page with unique keys."""
     st.title("📞 Make Calls")
     st.markdown("Enhanced outbound calling with CRM integration")
     
@@ -726,7 +815,7 @@ def render_make_calls():
     
     if selected_customer:
         st.info(f"📋 Selected customer: {selected_customer['name']} ({selected_customer['phone']})")
-        if st.button("❌ Clear Selection", key="clear_customer_selection"):
+        if st.button("❌ Clear Selection", key="make_calls_clear_selection_btn_unique_008"):
             st.session_state.selected_customer_for_call = None
             st.rerun()
     
@@ -738,7 +827,7 @@ def render_make_calls():
             "Select calling mode:",
             ["Single Call", "Bulk Calls"],
             help="Choose your calling approach",
-            key="call_type_selection"
+            key="make_calls_type_radio_unique_009"
         )
     
     with col2:
@@ -747,7 +836,7 @@ def render_make_calls():
             "Choose Assistant",
             options=list(ASSISTANTS.keys()),
             help="Select from your pre-configured assistants",
-            key="assistant_selection"
+            key="make_calls_assistant_select_unique_010"
         )
         assistant_id = ASSISTANTS[assistant_name]
     
@@ -762,13 +851,13 @@ def render_make_calls():
             customer_email = selected_customer['email']
             st.write(f"**Calling:** {customer_name} at {customer_number}")
         else:
-            customer_number = st.text_input("Customer Phone Number", placeholder="+1234567890", key="single_call_phone")
-            customer_name = st.text_input("Customer Name", placeholder="John Doe", key="single_call_name")
-            customer_email = st.text_input("Customer Email", placeholder="john@example.com", key="single_call_email")
+            customer_number = st.text_input("Customer Phone Number", placeholder="+1234567890", key="make_calls_phone_input_unique_011")
+            customer_name = st.text_input("Customer Name", placeholder="John Doe", key="make_calls_name_input_unique_012")
+            customer_email = st.text_input("Customer Email", placeholder="john@example.com", key="make_calls_email_input_unique_013")
         
-        customer_notes = st.text_area("Call Notes", placeholder="Purpose of call, talking points...", key="single_call_notes")
+        customer_notes = st.text_area("Call Notes", placeholder="Purpose of call, talking points...", key="make_calls_notes_textarea_unique_014")
         
-        if st.button("📞 Make Call", type="primary", disabled=not all([st.session_state.api_key, customer_number]), key="make_single_call"):
+        if st.button("📞 Make Call", type="primary", disabled=not all([st.session_state.api_key, customer_number]), key="make_calls_submit_btn_unique_015"):
             if not validate_phone_number(customer_number):
                 st.error("Please enter a valid phone number with country code")
             else:
@@ -825,9 +914,9 @@ def render_make_calls():
         
         bulk_input_method = st.radio(
             "Input method:",
-            ["Text Input", "Upload CSV"],
+            ["Text Input", "Upload CSV", "Select from CRM"],
             horizontal=True,
-            key="bulk_input_method"
+            key="make_calls_bulk_method_radio_unique_016"
         )
         
         customer_numbers = []
@@ -837,7 +926,7 @@ def render_make_calls():
                 "Phone Numbers (one per line)",
                 placeholder="+1234567890\n+0987654321\n+1122334455",
                 height=150,
-                key="bulk_numbers_text"
+                key="make_calls_bulk_text_area_unique_017"
             )
             
             if bulk_numbers_text:
@@ -849,7 +938,7 @@ def render_make_calls():
                 st.info(f"Found {len(customer_numbers)} valid phone numbers")
         
         elif bulk_input_method == "Upload CSV":
-            uploaded_file = st.file_uploader("Upload CSV file", type=['csv'], key="bulk_csv_upload")
+            uploaded_file = st.file_uploader("Upload CSV file", type=['csv'], key="make_calls_csv_upload_unique_018")
             
             if uploaded_file:
                 try:
@@ -876,8 +965,40 @@ def render_make_calls():
                 except Exception as e:
                     st.error(f"Error reading CSV: {str(e)}")
         
+        elif bulk_input_method == "Select from CRM":
+            customers = get_customers_from_db()
+            
+            if customers:
+                st.write("Select customers to call:")
+                
+                # Filter options
+                col1, col2 = st.columns(2)
+                with col1:
+                    status_filter = st.multiselect("Filter by Status", CUSTOMER_STATUSES, key="make_calls_crm_status_filter_unique_019")
+                with col2:
+                    min_score = st.slider("Minimum Lead Score", 0, 100, 0, key="make_calls_crm_score_slider_unique_020")
+                
+                # Filter customers
+                filtered_customers = customers
+                if status_filter:
+                    filtered_customers = [c for c in filtered_customers if c['status'] in status_filter]
+                if min_score > 0:
+                    filtered_customers = [c for c in filtered_customers if (c['lead_score'] or 0) >= min_score]
+                
+                # Customer selection
+                selected_customers = []
+                for i, customer in enumerate(filtered_customers[:20]):  # Limit to 20 for performance
+                    if st.checkbox(f"{customer['name']} - {customer['phone']} ({customer['status']})", 
+                                 key=f"make_calls_crm_customer_checkbox_unique_{i}_021"):
+                        selected_customers.append(customer)
+                
+                customer_numbers = [c['phone'] for c in selected_customers]
+                st.info(f"Selected {len(customer_numbers)} customers")
+            else:
+                st.warning("No customers found in CRM")
+        
         # Bulk call execution
-        if customer_numbers and st.button("📞 Make Bulk Calls", type="primary", key="make_bulk_calls"):
+        if customer_numbers and st.button("📞 Make Bulk Calls", type="primary", key="make_calls_bulk_submit_btn_unique_022"):
             customers = [{"number": num} for num in customer_numbers]
             
             with st.spinner(f"Making {len(customers)} calls..."):
@@ -910,14 +1031,14 @@ def render_make_calls():
                 st.error(f"Bulk calls failed: {result['error']}")
 
 def render_crm_dashboard():
-    """Render the CRM dashboard page."""
+    """Render the CRM dashboard page with unique keys."""
     st.title("👥 CRM Dashboard")
     st.markdown("Manage your customers, orders, and relationships")
     
     # Load demo customers if database is empty
     customers = get_customers_from_db(limit=5)
     if not customers:
-        if st.button("🎯 Load Demo Customers", key="load_demo_customers"):
+        if st.button("🎯 Load 25 Demo Customers", key="crm_dashboard_load_demo_btn_unique_023"):
             load_demo_customers()
             st.success("Demo customers loaded successfully!")
             st.rerun()
@@ -942,6 +1063,21 @@ def render_crm_dashboard():
         avg_score = sum([c['lead_score'] or 0 for c in all_customers]) / len(all_customers) if all_customers else 0
         st.metric("Avg Lead Score", f"{avg_score:.1f}")
     
+    # Customer status distribution
+    if all_customers:
+        st.subheader("📊 Customer Status Distribution")
+        status_counts = {}
+        for customer in all_customers:
+            status = customer['status'] or 'Unknown'
+            status_counts[status] = status_counts.get(status, 0) + 1
+        
+        fig = px.pie(
+            values=list(status_counts.values()),
+            names=list(status_counts.keys()),
+            title="Customer Status Distribution"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
     # Recent customers and quick actions
     col1, col2 = st.columns(2)
     
@@ -950,13 +1086,13 @@ def render_crm_dashboard():
         recent_customers = get_customers_from_db(limit=5)
         
         for i, customer in enumerate(recent_customers):
-            with st.expander(f"👤 {customer['name']} - {customer['company']}", key=f"crm_customer_{i}"):
+            with st.expander(f"👤 {customer['name']} - {customer['company']}", key=f"crm_dashboard_customer_expander_unique_{i}_024"):
                 st.write(f"**Status:** {customer['status']}")
                 st.write(f"**Lead Score:** {customer['lead_score']}/100")
                 st.write(f"**Phone:** {customer['phone']}")
                 st.write(f"**Total Value:** ${customer['total_value'] or 0:,.2f}")
                 
-                if st.button(f"📞 Call {customer['name']}", key=f"call_customer_{i}"):
+                if st.button(f"📞 Call {customer['name']}", key=f"crm_dashboard_call_customer_btn_unique_{i}_025"):
                     st.session_state.selected_customer_for_call = customer
                     st.session_state.current_page = "📞 Make Calls"
                     st.rerun()
@@ -964,15 +1100,170 @@ def render_crm_dashboard():
     with col2:
         st.subheader("🚀 Quick Actions")
         
-        if st.button("➕ Add New Customer", type="primary", key="add_new_customer"):
+        if st.button("➕ Add New Customer", type="primary", key="crm_dashboard_add_customer_btn_unique_026"):
             st.session_state.show_add_customer = True
         
-        if st.button("📋 View All Customers", key="view_all_customers"):
+        if st.button("📋 View All Customers", key="crm_dashboard_view_all_btn_unique_027"):
             st.session_state.current_page = "👥 CRM Manager"
             st.rerun()
+        
+        if st.button("📊 Customer Analytics", key="crm_dashboard_analytics_btn_unique_028"):
+            st.session_state.current_page = "📈 Analytics"
+            st.rerun()
+        
+        if st.button("📤 Export Customers", key="crm_dashboard_export_btn_unique_029"):
+            customers_df = pd.DataFrame(all_customers)
+            csv_data = customers_df.to_csv(index=False)
+            st.download_button(
+                label="💾 Download CSV",
+                data=csv_data,
+                file_name=f"customers_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv",
+                key="crm_dashboard_download_btn_unique_030"
+            )
+    
+    # Add customer form
+    if st.session_state.get('show_add_customer', False):
+        st.subheader("➕ Add New Customer")
+        
+        with st.form("add_customer_form_unique_031"):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                name = st.text_input("Customer Name*", key="add_customer_name_input_unique_032")
+                email = st.text_input("Email*", key="add_customer_email_input_unique_033")
+                phone = st.text_input("Phone*", key="add_customer_phone_input_unique_034")
+                company = st.text_input("Company", key="add_customer_company_input_unique_035")
+                position = st.text_input("Position", key="add_customer_position_input_unique_036")
+            
+            with col2:
+                status = st.selectbox("Status", CUSTOMER_STATUSES, key="add_customer_status_select_unique_037")
+                lead_score = st.slider("Lead Score", 0, 100, 50, key="add_customer_score_slider_unique_038")
+                tags = st.text_input("Tags (comma-separated)", key="add_customer_tags_input_unique_039")
+                notes = st.text_area("Notes", key="add_customer_notes_textarea_unique_040")
+            
+            submitted = st.form_submit_button("Add Customer", key="add_customer_submit_btn_unique_041")
+            
+            if submitted and name and email and phone:
+                customer_data = {
+                    'id': str(uuid.uuid4()),
+                    'name': name,
+                    'email': email,
+                    'phone': phone,
+                    'company': company,
+                    'position': position,
+                    'lead_score': lead_score,
+                    'status': status,
+                    'notes': notes,
+                    'tags': tags,
+                    'total_value': 0,
+                    'created_at': datetime.now().isoformat(),
+                    'updated_at': datetime.now().isoformat()
+                }
+                
+                # Save to database
+                conn = sqlite3.connect('vapi_calls.db')
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    INSERT INTO customers 
+                    (id, name, email, phone, company, position, lead_score, status, 
+                     notes, tags, total_value, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    customer_data['id'], customer_data['name'], customer_data['email'],
+                    customer_data['phone'], customer_data['company'], customer_data['position'],
+                    customer_data['lead_score'], customer_data['status'], customer_data['notes'],
+                    customer_data['tags'], customer_data['total_value'], 
+                    customer_data['created_at'], customer_data['updated_at']
+                ))
+                
+                conn.commit()
+                conn.close()
+                
+                st.success(f"Customer {name} added successfully!")
+                st.session_state.show_add_customer = False
+                st.rerun()
+
+def render_crm_manager():
+    """Render the full CRM management page with unique keys."""
+    st.title("👥 CRM Manager")
+    st.markdown("Complete customer relationship management")
+    
+    # Search and filter controls
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
+    with col1:
+        search_term = st.text_input("🔍 Search customers", placeholder="Name, email, company, or phone", key="crm_manager_search_input_unique_042")
+    
+    with col2:
+        status_filter = st.selectbox("Filter by Status", ["All"] + CUSTOMER_STATUSES, key="crm_manager_status_filter_unique_043")
+        if status_filter == "All":
+            status_filter = None
+    
+    with col3:
+        sort_by = st.selectbox("Sort by", ["Updated", "Name", "Lead Score", "Total Value"], key="crm_manager_sort_select_unique_044")
+    
+    # Get filtered customers
+    customers = get_customers_from_db(search_term=search_term, status_filter=status_filter)
+    
+    # Sort customers
+    if sort_by == "Name":
+        customers.sort(key=lambda x: x['name'] or '')
+    elif sort_by == "Lead Score":
+        customers.sort(key=lambda x: x['lead_score'] or 0, reverse=True)
+    elif sort_by == "Total Value":
+        customers.sort(key=lambda x: x['total_value'] or 0, reverse=True)
+    
+    st.write(f"Found {len(customers)} customers")
+    
+    # Customer list with actions
+    for i, customer in enumerate(customers):
+        with st.expander(f"👤 {customer['name']} - {customer['company']} ({customer['status']})", key=f"crm_manager_customer_expander_unique_{i}_045"):
+            col1, col2, col3 = st.columns([2, 1, 1])
+            
+            with col1:
+                st.write(f"**Email:** {customer['email']}")
+                st.write(f"**Phone:** {customer['phone']}")
+                st.write(f"**Position:** {customer['position']}")
+                st.write(f"**Lead Score:** {customer['lead_score']}/100")
+                st.write(f"**Total Value:** ${customer['total_value'] or 0:,.2f}")
+                if customer['notes']:
+                    st.write(f"**Notes:** {customer['notes']}")
+                if customer['tags']:
+                    st.write(f"**Tags:** {customer['tags']}")
+            
+            with col2:
+                # Customer orders
+                orders = get_customer_orders(customer['id'])
+                st.write(f"**Orders:** {len(orders)}")
+                
+                if orders:
+                    for j, order in enumerate(orders[:3]):  # Show last 3 orders
+                        status_color = {
+                            'Completed': '🟢',
+                            'Processing': '🟡', 
+                            'Pending': '🟠',
+                            'Cancelled': '🔴'
+                        }.get(order['status'], '⚪')
+                        
+                        st.write(f"{status_color} {order['id']}: ${order['amount']:,.2f} ({order['status']})")
+            
+            with col3:
+                # Action buttons
+                if st.button(f"📞 Call", key=f"crm_manager_call_btn_unique_{i}_046"):
+                    st.session_state.selected_customer_for_call = customer
+                    st.session_state.current_page = "📞 Make Calls"
+                    st.rerun()
+                
+                if st.button(f"✏️ Edit", key=f"crm_manager_edit_btn_unique_{i}_047"):
+                    st.session_state.editing_customer = customer
+                
+                if st.button(f"📋 Orders", key=f"crm_manager_orders_btn_unique_{i}_048"):
+                    st.session_state.viewing_customer_orders = customer['id']
 
 def render_call_history():
-    """Render the call history page."""
+    """Render the call history page with unique keys."""
     st.title("📋 Call History")
     st.markdown("Complete call history with advanced filtering and export options")
     
@@ -997,12 +1288,49 @@ def render_call_history():
         total_duration = sum([c['duration'] or 0 for c in calls])
         st.metric("Total Duration", f"{total_duration}s")
     
+    # Export options
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("📥 Export CSV", key="call_history_export_csv_btn_unique_049"):
+            if calls:
+                df = pd.DataFrame(calls)
+                csv_data = df.to_csv(index=False)
+                st.download_button(
+                    label="💾 Download CSV",
+                    data=csv_data,
+                    file_name=f"call_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv",
+                    key="call_history_download_csv_btn_unique_050"
+                )
+    
+    with col2:
+        if st.button("📊 Export Excel", key="call_history_export_excel_btn_unique_051"):
+            if calls:
+                df = pd.DataFrame(calls)
+                excel_buffer = BytesIO()
+                df.to_excel(excel_buffer, index=False, engine='openpyxl')
+                excel_data = excel_buffer.getvalue()
+                st.download_button(
+                    label="💾 Download Excel",
+                    data=excel_data,
+                    file_name=f"call_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="call_history_download_excel_btn_unique_052"
+                )
+    
+    with col3:
+        if st.button("📋 Copy to Clipboard", key="call_history_copy_btn_unique_053"):
+            if calls:
+                df = pd.DataFrame(calls)
+                st.code(df.to_string(index=False))
+    
     # Call history table
     if calls:
         st.subheader("📞 Call Records")
         
         for i, call in enumerate(calls):
-            with st.expander(f"📞 {call['customer_phone']} - {call['status'].upper()}", key=f"call_history_{i}"):
+            with st.expander(f"📞 {call['customer_phone']} - {call['status'].upper()}", key=f"call_history_call_expander_unique_{i}_054"):
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
@@ -1022,13 +1350,13 @@ def render_call_history():
                 
                 with col3:
                     if call['transcript']:
-                        if st.button(f"📝 View Transcript", key=f"transcript_{i}"):
+                        if st.button(f"📝 View Transcript", key=f"call_history_transcript_btn_unique_{i}_055"):
                             st.session_state.viewing_transcript = call['id']
                             st.session_state.current_page = "📝 Transcripts"
                             st.rerun()
                     
                     if call['recording_path']:
-                        if st.button(f"🎵 Play Recording", key=f"recording_{i}"):
+                        if st.button(f"🎵 Play Recording", key=f"call_history_recording_btn_unique_{i}_056"):
                             st.session_state.viewing_recording = call['id']
                             st.session_state.current_page = "🎵 Recordings"
                             st.rerun()
@@ -1039,68 +1367,291 @@ def render_call_history():
         st.info("No calls found.")
 
 def render_transcripts():
-    """Render the transcripts page."""
+    """Render the transcripts page with unique keys."""
     st.title("📝 Transcripts")
     st.markdown("View, search, and manage call transcripts")
     
-    # Get calls with transcripts
-    calls_with_transcripts = [c for c in get_calls_from_db() if c['transcript']]
+    # Check if viewing specific transcript
+    viewing_transcript_id = st.session_state.get('viewing_transcript')
     
-    st.write(f"Found {len(calls_with_transcripts)} transcripts")
+    if viewing_transcript_id:
+        # Display specific transcript
+        calls = get_calls_from_db()
+        call = next((c for c in calls if c['id'] == viewing_transcript_id), None)
+        
+        if call and call['transcript']:
+            st.subheader(f"📝 Transcript: {call['customer_phone']}")
+            
+            col1, col2 = st.columns([3, 1])
+            
+            with col1:
+                st.write(f"**Call Date:** {call['timestamp'][:16] if call['timestamp'] else 'N/A'}")
+                st.write(f"**Assistant:** {call['assistant_name']}")
+                st.write(f"**Customer:** {call['customer_phone']}")
+                if call['customer_name']:
+                    st.write(f"**Name:** {call['customer_name']}")
+                st.write(f"**Duration:** {call['duration'] or 0}s")
+            
+            with col2:
+                # Export options
+                if st.button("📥 Export TXT", key="transcripts_export_txt_btn_unique_057"):
+                    transcript_data = f"""Call Transcript
+Date: {call['timestamp'][:16] if call['timestamp'] else 'N/A'}
+Assistant: {call['assistant_name']}
+Customer: {call['customer_phone']}
+Duration: {call['duration'] or 0}s
+
+Transcript:
+{call['transcript']}
+"""
+                    st.download_button(
+                        label="💾 Download TXT",
+                        data=transcript_data,
+                        file_name=f"transcript_{call['call_id'][:8]}.txt",
+                        mime="text/plain",
+                        key="transcripts_download_txt_btn_unique_058"
+                    )
+                
+                if st.button("📋 Copy Text", key="transcripts_copy_btn_unique_059"):
+                    st.code(call['transcript'])
+                
+                if st.button("⬅️ Back to List", key="transcripts_back_btn_unique_060"):
+                    st.session_state.viewing_transcript = None
+                    st.rerun()
+            
+            # Display transcript
+            st.subheader("📄 Transcript Content")
+            st.text_area("", value=call['transcript'], height=400, disabled=True, key="transcripts_content_textarea_unique_061")
+            
+            # Transcript analysis
+            st.subheader("🔍 Quick Analysis")
+            
+            transcript_text = call['transcript'].lower()
+            word_count = len(call['transcript'].split())
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Word Count", word_count)
+            
+            with col2:
+                # Simple sentiment analysis
+                positive_words = ['yes', 'great', 'good', 'excellent', 'interested', 'perfect']
+                negative_words = ['no', 'not', 'bad', 'terrible', 'uninterested', 'busy']
+                
+                positive_count = sum(transcript_text.count(word) for word in positive_words)
+                negative_count = sum(transcript_text.count(word) for word in negative_words)
+                
+                sentiment = "Positive" if positive_count > negative_count else "Negative" if negative_count > positive_count else "Neutral"
+                st.metric("Sentiment", sentiment)
+            
+            with col3:
+                # Extract phone numbers or emails mentioned
+                import re
+                emails = re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', call['transcript'])
+                st.metric("Emails Mentioned", len(emails))
+        
+        else:
+            st.error("Transcript not found or not available")
+            if st.button("⬅️ Back to List", key="transcripts_back_error_btn_unique_062"):
+                st.session_state.viewing_transcript = None
+                st.rerun()
     
-    if calls_with_transcripts:
-        for i, call in enumerate(calls_with_transcripts):
-            with st.expander(f"📝 {call['customer_phone']} - {call['timestamp'][:16] if call['timestamp'] else 'N/A'}", key=f"transcript_{i}"):
-                col1, col2 = st.columns([3, 1])
-                
-                with col1:
-                    # Show first 200 characters of transcript
-                    preview = call['transcript'][:200] + "..." if len(call['transcript']) > 200 else call['transcript']
-                    st.write(f"**Preview:** {preview}")
-                    st.write(f"**Assistant:** {call['assistant_name']}")
-                    st.write(f"**Duration:** {call['duration'] or 0}s")
-                
-                with col2:
-                    if st.button("👁️ View Full", key=f"view_transcript_{i}"):
-                        st.text_area("Full Transcript", value=call['transcript'], height=300, key=f"full_transcript_{i}")
     else:
-        st.info("No transcripts found.")
+        # Display transcript list
+        calls_with_transcripts = [c for c in get_calls_from_db() if c['transcript']]
+        
+        # Search functionality
+        search_term = st.text_input("🔍 Search transcripts", placeholder="Enter keywords to search...", key="transcripts_search_input_unique_063")
+        
+        if search_term:
+            calls_with_transcripts = [c for c in calls_with_transcripts 
+                                    if search_term.lower() in c['transcript'].lower()]
+        
+        # Display summary
+        st.write(f"Found {len(calls_with_transcripts)} transcripts")
+        
+        if calls_with_transcripts:
+            # Bulk export
+            if st.button("📥 Export All Transcripts", key="transcripts_export_all_btn_unique_064"):
+                all_transcripts = ""
+                for call in calls_with_transcripts:
+                    all_transcripts += f"""
+=== Call {call['call_id'][:8]} ===
+Date: {call['timestamp'][:16] if call['timestamp'] else 'N/A'}
+Customer: {call['customer_phone']}
+Assistant: {call['assistant_name']}
+Duration: {call['duration'] or 0}s
+
+{call['transcript']}
+
+{'='*50}
+
+"""
+                
+                st.download_button(
+                    label="💾 Download All Transcripts",
+                    data=all_transcripts,
+                    file_name=f"all_transcripts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                    mime="text/plain",
+                    key="transcripts_download_all_btn_unique_065"
+                )
+            
+            # Transcript list
+            for i, call in enumerate(calls_with_transcripts):
+                with st.expander(f"📝 {call['customer_phone']} - {call['timestamp'][:16] if call['timestamp'] else 'N/A'}", key=f"transcripts_call_expander_unique_{i}_066"):
+                    col1, col2 = st.columns([3, 1])
+                    
+                    with col1:
+                        # Show first 200 characters of transcript
+                        preview = call['transcript'][:200] + "..." if len(call['transcript']) > 200 else call['transcript']
+                        st.write(f"**Preview:** {preview}")
+                        st.write(f"**Assistant:** {call['assistant_name']}")
+                        st.write(f"**Duration:** {call['duration'] or 0}s")
+                    
+                    with col2:
+                        if st.button("👁️ View Full", key=f"transcripts_view_full_btn_unique_{i}_067"):
+                            st.session_state.viewing_transcript = call['id']
+                            st.rerun()
+                        
+                        if st.button("📥 Export", key=f"transcripts_export_single_btn_unique_{i}_068"):
+                            transcript_data = f"""Call Transcript
+Date: {call['timestamp'][:16] if call['timestamp'] else 'N/A'}
+Customer: {call['customer_phone']}
+Assistant: {call['assistant_name']}
+Duration: {call['duration'] or 0}s
+
+{call['transcript']}
+"""
+                            st.download_button(
+                                label="💾 Download",
+                                data=transcript_data,
+                                file_name=f"transcript_{call['call_id'][:8]}.txt",
+                                mime="text/plain",
+                                key=f"transcripts_download_single_btn_unique_{i}_069"
+                            )
+        else:
+            st.info("No transcripts found. Transcripts will appear here after calls are completed.")
 
 def render_recordings():
-    """Render the recordings page."""
+    """Render the recordings page with MP3 playback and unique keys."""
     st.title("🎵 Recordings")
     st.markdown("Listen to and manage call recordings")
     
-    # Get calls with recordings
-    calls_with_recordings = [c for c in get_calls_from_db() 
-                           if c['recording_url'] or c['recording_path']]
+    # Check if viewing specific recording
+    viewing_recording_id = st.session_state.get('viewing_recording')
     
-    st.write(f"Found {len(calls_with_recordings)} recordings")
+    if viewing_recording_id:
+        # Display specific recording
+        calls = get_calls_from_db()
+        call = next((c for c in calls if c['id'] == viewing_recording_id), None)
+        
+        if call:
+            st.subheader(f"🎵 Recording: {call['customer_phone']}")
+            
+            col1, col2 = st.columns([3, 1])
+            
+            with col1:
+                st.write(f"**Call Date:** {call['timestamp'][:16] if call['timestamp'] else 'N/A'}")
+                st.write(f"**Assistant:** {call['assistant_name']}")
+                st.write(f"**Customer:** {call['customer_phone']}")
+                if call['customer_name']:
+                    st.write(f"**Name:** {call['customer_name']}")
+                st.write(f"**Duration:** {call['duration'] or 0}s")
+            
+            with col2:
+                if st.button("⬅️ Back to List", key="recordings_back_btn_unique_070"):
+                    st.session_state.viewing_recording = None
+                    st.rerun()
+            
+            # Recording playback
+            if call['recording_path'] and os.path.exists(call['recording_path']):
+                st.subheader("🎧 Audio Player")
+                
+                # Read audio file
+                try:
+                    with open(call['recording_path'], 'rb') as audio_file:
+                        audio_bytes = audio_file.read()
+                    
+                    # Display audio player
+                    st.audio(audio_bytes, format='audio/mp3')
+                    
+                    # Download option
+                    st.download_button(
+                        label="💾 Download Recording",
+                        data=audio_bytes,
+                        file_name=f"recording_{call['call_id'][:8]}.mp3",
+                        mime="audio/mpeg",
+                        key="recordings_download_btn_unique_071"
+                    )
+                except Exception as e:
+                    st.error(f"Error loading audio file: {str(e)}")
+                
+            elif call['recording_url']:
+                st.subheader("📥 Download Recording")
+                st.write("Recording is available for download from Vapi servers.")
+                st.info("Recording download from Vapi servers will be implemented in a future version.")
+            else:
+                st.warning("No recording available for this call.")
+        
+        else:
+            st.error("Call not found")
+            if st.button("⬅️ Back to List", key="recordings_back_error_btn_unique_072"):
+                st.session_state.viewing_recording = None
+                st.rerun()
     
-    if calls_with_recordings:
-        for i, call in enumerate(calls_with_recordings):
-            with st.expander(f"🎵 {call['customer_phone']} - {call['timestamp'][:16] if call['timestamp'] else 'N/A'}", key=f"recording_{i}"):
-                col1, col2 = st.columns([2, 1])
-                
-                with col1:
-                    st.write(f"**Assistant:** {call['assistant_name']}")
-                    st.write(f"**Duration:** {call['duration'] or 0}s")
-                    st.write(f"**Status:** {'Downloaded' if call['recording_path'] else 'Available'}")
-                
-                with col2:
-                    if call['recording_path'] and os.path.exists(call['recording_path']):
-                        # Quick play option
-                        try:
-                            with open(call['recording_path'], 'rb') as audio_file:
-                                audio_bytes = audio_file.read()
-                            st.audio(audio_bytes, format='audio/mp3')
-                        except Exception as e:
-                            st.error(f"Error loading audio: {str(e)}")
     else:
-        st.info("No recordings found.")
+        # Display recordings list
+        calls_with_recordings = [c for c in get_calls_from_db() 
+                               if c['recording_url'] or c['recording_path']]
+        
+        st.write(f"Found {len(calls_with_recordings)} recordings")
+        
+        if calls_with_recordings:
+            # Recordings list
+            for i, call in enumerate(calls_with_recordings):
+                with st.expander(f"🎵 {call['customer_phone']} - {call['timestamp'][:16] if call['timestamp'] else 'N/A'}", key=f"recordings_call_expander_unique_{i}_073"):
+                    col1, col2, col3 = st.columns([2, 1, 1])
+                    
+                    with col1:
+                        st.write(f"**Assistant:** {call['assistant_name']}")
+                        st.write(f"**Duration:** {call['duration'] or 0}s")
+                        st.write(f"**Status:** {'Downloaded' if call['recording_path'] else 'Available'}")
+                    
+                    with col2:
+                        if call['recording_path'] and os.path.exists(call['recording_path']):
+                            # Quick play option
+                            try:
+                                with open(call['recording_path'], 'rb') as audio_file:
+                                    audio_bytes = audio_file.read()
+                                st.audio(audio_bytes, format='audio/mp3')
+                            except Exception as e:
+                                st.error(f"Error loading audio: {str(e)}")
+                    
+                    with col3:
+                        if st.button("🎧 Open Player", key=f"recordings_open_player_btn_unique_{i}_074"):
+                            st.session_state.viewing_recording = call['id']
+                            st.rerun()
+                        
+                        if call['recording_path'] and os.path.exists(call['recording_path']):
+                            try:
+                                with open(call['recording_path'], 'rb') as audio_file:
+                                    audio_bytes = audio_file.read()
+                                
+                                st.download_button(
+                                    label="💾 Download",
+                                    data=audio_bytes,
+                                    file_name=f"recording_{call['call_id'][:8]}.mp3",
+                                    mime="audio/mpeg",
+                                    key=f"recordings_download_single_btn_unique_{i}_075"
+                                )
+                            except Exception as e:
+                                st.error(f"Error: {str(e)}")
+        else:
+            st.info("No recordings found. Recordings will appear here after calls are completed.")
 
 def render_assistant_manager():
-    """Render the assistant manager page."""
+    """Render the assistant manager page with unique keys."""
     st.title("🤖 Assistant Manager")
     st.markdown("Create and manage your AI assistants")
     
@@ -1108,43 +1659,109 @@ def render_assistant_manager():
     st.subheader("📋 Your Assistants")
     
     for i, (name, assistant_id) in enumerate(ASSISTANTS.items()):
-        with st.expander(f"🤖 {name}", key=f"assistant_{i}"):
+        with st.expander(f"🤖 {name}", key=f"assistant_manager_expander_unique_{i}_076"):
             st.code(f"ID: {assistant_id}")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button(f"📞 Test Call", key=f"assistant_manager_test_btn_unique_{i}_077"):
+                    st.info("Test call feature coming soon!")
+            
+            with col2:
+                if st.button(f"✏️ Edit", key=f"assistant_manager_edit_btn_unique_{i}_078"):
+                    st.info("Edit feature coming soon!")
 
 def render_analytics():
-    """Render the analytics page."""
+    """Render the analytics page with unique keys."""
     st.title("📈 Analytics")
     st.markdown("Comprehensive insights into your calling performance")
     
-    # Get analytics data
-    daily_stats, overall_stats = get_call_analytics()
+    # Get data
     calls = get_calls_from_db()
     customers = get_customers_from_db()
     
     # Overview metrics
     col1, col2, col3, col4 = st.columns(4)
     
-    if overall_stats:
-        with col1:
-            st.metric("Total Calls", overall_stats[0] or 0)
-        with col2:
-            st.metric("Success Rate", f"{(overall_stats[1] / overall_stats[0] * 100) if overall_stats[0] > 0 else 0:.1f}%")
-        with col3:
-            st.metric("Avg Duration", f"{overall_stats[3] or 0:.1f}s")
-        with col4:
-            st.metric("Total Cost", f"${overall_stats[4] or 0:.2f}")
+    with col1:
+        st.metric("Total Calls", len(calls))
     
-    # Charts and visualizations
-    if daily_stats:
-        df_daily = pd.DataFrame(daily_stats, columns=['date', 'total_calls', 'successful_calls', 'failed_calls', 'avg_duration', 'total_cost'])
+    with col2:
+        completed_calls = len([c for c in calls if c['status'] == 'completed'])
+        success_rate = (completed_calls / len(calls) * 100) if calls else 0
+        st.metric("Success Rate", f"{success_rate:.1f}%")
+    
+    with col3:
+        total_duration = sum([c['duration'] or 0 for c in calls])
+        avg_duration = total_duration / len(calls) if calls else 0
+        st.metric("Avg Duration", f"{avg_duration:.1f}s")
+    
+    with col4:
+        st.metric("Total Customers", len(customers))
+    
+    # Assistant performance
+    if calls:
+        st.subheader("🤖 Assistant Performance")
         
-        # Call volume over time
-        st.subheader("📊 Call Volume Over Time")
-        fig = px.line(df_daily, x='date', y='total_calls', title='Daily Call Volume')
-        st.plotly_chart(fig, use_container_width=True)
+        assistant_stats = {}
+        for call in calls:
+            assistant = call['assistant_name']
+            if assistant not in assistant_stats:
+                assistant_stats[assistant] = {'total': 0, 'completed': 0, 'duration': 0}
+            
+            assistant_stats[assistant]['total'] += 1
+            if call['status'] == 'completed':
+                assistant_stats[assistant]['completed'] += 1
+            assistant_stats[assistant]['duration'] += call['duration'] or 0
+        
+        # Create assistant performance dataframe
+        assistant_data = []
+        for assistant, stats in assistant_stats.items():
+            success_rate = (stats['completed'] / stats['total'] * 100) if stats['total'] > 0 else 0
+            avg_duration = stats['duration'] / stats['total'] if stats['total'] > 0 else 0
+            
+            assistant_data.append({
+                'Assistant': assistant,
+                'Total Calls': stats['total'],
+                'Success Rate': f"{success_rate:.1f}%",
+                'Avg Duration': f"{avg_duration:.1f}s"
+            })
+        
+        df_assistants = pd.DataFrame(assistant_data)
+        st.dataframe(df_assistants, use_container_width=True)
+    
+    # Customer insights
+    if customers:
+        st.subheader("👥 Customer Insights")
+        
+        # Customer status distribution
+        status_counts = {}
+        for customer in customers:
+            status = customer['status'] or 'Unknown'
+            status_counts[status] = status_counts.get(status, 0) + 1
+        
+        if status_counts:
+            fig = px.pie(values=list(status_counts.values()), names=list(status_counts.keys()), 
+                        title="Customer Status Distribution")
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # Top customers by value
+        top_customers = sorted(customers, key=lambda x: x['total_value'] or 0, reverse=True)[:10]
+        
+        if top_customers:
+            st.subheader("💎 Top Customers by Value")
+            top_customer_data = [{
+                'Name': c['name'],
+                'Company': c['company'],
+                'Total Value': f"${c['total_value'] or 0:,.2f}",
+                'Status': c['status']
+            } for c in top_customers]
+            
+            df_top_customers = pd.DataFrame(top_customer_data)
+            st.dataframe(df_top_customers, use_container_width=True)
 
 def render_settings():
-    """Render the settings page."""
+    """Render the settings page with unique keys."""
     st.title("⚙️ Settings")
     st.markdown("Configure your Vapi application settings")
     
@@ -1153,15 +1770,97 @@ def render_settings():
     
     with st.expander("API Settings"):
         current_api_key = st.session_state.api_key
-        new_api_key = st.text_input("Vapi API Key", value=current_api_key, type="password", key="settings_api_key")
+        new_api_key = st.text_input("Vapi API Key", value=current_api_key, type="password", key="settings_api_key_input_unique_079")
         
         if new_api_key != current_api_key:
             st.session_state.api_key = new_api_key
             st.success("API key updated!")
+        
+        # Test connection
+        if st.button("🔍 Test API Connection", key="settings_test_connection_btn_unique_080"):
+            if new_api_key:
+                with st.spinner("Testing connection..."):
+                    result = test_api_connection(new_api_key)
+                    if result["success"]:
+                        st.success("✅ API connection successful!")
+                    else:
+                        st.error(f"❌ Connection failed: {result['error']}")
+            else:
+                st.warning("Please enter an API key first")
+    
+    # Phone Number Settings
+    st.subheader("📱 Phone Number Configuration")
+    
+    with st.expander("Phone Number Settings"):
+        st.info(f"Current Phone Number ID: {STATIC_PHONE_NUMBER_ID}")
+        st.write("This is the phone number used for all outbound calls.")
+    
+    # Database Settings
+    st.subheader("🗄️ Database Management")
+    
+    with st.expander("Database Operations"):
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("🔄 Reset Demo Data", key="settings_reset_demo_btn_unique_081"):
+                load_demo_customers()
+                st.success("Demo customers reloaded!")
+        
+        with col2:
+            if st.button("📥 Export Database", key="settings_export_db_btn_unique_082"):
+                # Export all data
+                calls = get_calls_from_db()
+                customers = get_customers_from_db()
+                
+                export_data = {
+                    'calls': calls,
+                    'customers': customers,
+                    'export_date': datetime.now().isoformat()
+                }
+                
+                json_data = json.dumps(export_data, indent=2)
+                st.download_button(
+                    label="💾 Download Database Export",
+                    data=json_data,
+                    file_name=f"database_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    mime="application/json",
+                    key="settings_download_db_btn_unique_083"
+                )
+        
+        with col3:
+            if st.button("⚠️ Clear All Data", key="settings_clear_data_btn_unique_084"):
+                if st.checkbox("I understand this will delete all data", key="settings_confirm_clear_checkbox_unique_085"):
+                    conn = sqlite3.connect('vapi_calls.db')
+                    cursor = conn.cursor()
+                    cursor.execute('DELETE FROM calls')
+                    cursor.execute('DELETE FROM customers')
+                    cursor.execute('DELETE FROM orders')
+                    cursor.execute('DELETE FROM customer_interactions')
+                    conn.commit()
+                    conn.close()
+                    st.success("All data cleared!")
+    
+    # System Information
+    st.subheader("ℹ️ System Information")
+    
+    with st.expander("System Info"):
+        st.write(f"**Application Version:** 3.0.0 Enhanced Fixed")
+        st.write(f"**Database:** SQLite")
+        st.write(f"**Total Calls:** {len(get_calls_from_db())}")
+        st.write(f"**Total Customers:** {len(get_customers_from_db())}")
+        st.write(f"**Available Assistants:** {len(ASSISTANTS)}")
+        
+        # Database file size
+        try:
+            db_size = os.path.getsize('vapi_calls.db')
+            st.write(f"**Database Size:** {db_size / 1024:.2f} KB")
+        except:
+            st.write("**Database Size:** Unknown")
 
 # Main function with proper routing
 def main():
-    """Main application function with complete routing."""
+    """Main application function with complete routing and unique keys."""
+    init_session_state()
     render_navigation()
     
     # Route to appropriate page
@@ -1171,6 +1870,8 @@ def main():
         render_dashboard()
     elif "CRM Dashboard" in page:
         render_crm_dashboard()
+    elif "CRM Manager" in page:
+        render_crm_manager()
     elif "Make Calls" in page:
         render_make_calls()
     elif "Call History" in page:
@@ -1188,6 +1889,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
